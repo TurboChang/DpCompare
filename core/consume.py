@@ -2,7 +2,13 @@
 # author TurboChang
 
 import time
+import os
+import sys
 from confluent_kafka import Consumer, TopicPartition, KafkaException, KafkaError
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(base_dir)
+from assets.conf_case import *
+
 
 class KafkaConsumer:
 
@@ -11,12 +17,15 @@ class KafkaConsumer:
         self.begin_time = begin_time
         self.end_time = end_time
         self.consumer = Consumer({
-            'bootstrap.servers': "59.110.219.31:9092",
+            'bootstrap.servers': bootstrap_servers,
             'group.id': "groupid",
             'auto.offset.reset': "earliest",
         })
         self.timeout = 10
         self.consumer_lists = []
+
+    def __del__(self):
+        self.consumer.close()
 
     @staticmethod
     def __str_to_timestamp(str_time, format_type='%Y-%m-%d %H:%M:%S'):
@@ -59,12 +68,9 @@ class KafkaConsumer:
     def run(self):
         print(self.__timestamp_to_offset())
         print(type(self.consume_kafka()[0]))
-        # return self.consume_kafka()
+        return self.consume_kafka()
 
 if __name__ == '__main__':
-    topic = "dp_agent_1_DP_TEST_T1"
-    begin_time = "2021-08-18 17:00:00"
-    end_time = "2021-08-19 10:30:00"
     f = KafkaConsumer(topic, begin_time, end_time)
     g = f.run()
     print(g)
