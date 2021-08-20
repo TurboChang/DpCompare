@@ -72,5 +72,6 @@ class KafkaConsumer:
 
 if __name__ == '__main__':
     f = KafkaConsumer(topic, begin_time, end_time)
-    g = f.run()
+    # g = f.run()
+    g = f.consume_kafka()
     print(g)
