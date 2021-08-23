@@ -4,6 +4,7 @@
 import os
 import sys
 import json
+import csv
 import pandas as pd
 from core.dp_consume import KafkaConsumer
 from core.dp_oracle import OracleDB
@@ -21,6 +22,7 @@ class StoreKafka:
         self.keys_list = []
         self.parent_path = os.getcwd()
         self.col_files = self.parent_path + "/save/col_name/tab_col"
+        self.csv_file = self.parent_path + "/save/{0}.csv".format(topic)
 
     def merge_data(self, brfore_list, after_list):
         if isinstance(brfore_list, dict) and isinstance(after_list, dict):
@@ -57,8 +59,10 @@ class StoreKafka:
                         self.dict_list.append(where)
 
         keys = self.keys_list[0]
+        to_csv = open(self.csv_file, "w", encoding="utf-8")
+        writer = csv.writer(to_csv)
+        writer.writerow(keys)
         keys = ",".join(str(x) for x in keys)
-        print(self.parent_path)
         wf = open(self.col_files, "w")
         wf.write(keys)
         wf.close()
@@ -73,8 +77,11 @@ class StoreKafka:
 
         for dict in distinct_list:
             prikeys_list.append(dict[self.prikey])
-            datas = ",".join(list(dict.values()))
-            print(datas)        #后续要写CSV
+            # datas = ",".join(list(dict.values()))
+            # print(datas)        #后续要写CSV
+            datas = list(dict.values())
+            writer.writerow(datas)
+        to_csv.close()
 
         keys_file = self.parent_path + "/save/keys/save_keys"
         keys_datas = ", ".join(prikeys_list)
@@ -94,6 +101,6 @@ class StoreDB:
 if __name__ == '__main__':
     f = StoreKafka("ID")
     f.store_data()
-    g = StoreDB("T1")
-    g.test()
+    # g = StoreDB("T1")
+    # g.test()
 

@@ -88,9 +88,6 @@ class OracleDB:
             cursor.close()
             return results
 
-    def determine_data_type(self):
-        pass
-
     def query(self):
         primary_key = open(self.keys_data, "r")
         keys = primary_key.read()
