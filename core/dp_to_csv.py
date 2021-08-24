@@ -14,7 +14,7 @@ from assets.conf_case import *
 
 class StoreKafka:
 
-    def __init__(self, primary_key):
+    def __init__(self, primary_key:list):
         f = KafkaConsumer(topic, begin_time, end_time)
         self.message = f.consume_kafka()
         self.prikey = primary_key
@@ -23,6 +23,7 @@ class StoreKafka:
         self.parent_path = os.getcwd()
         self.col_files = self.parent_path + "/save/col_name/tab_col"
         self.csv_file = self.parent_path + "/save/{0}.csv".format(topic)
+        self.prikeys_list = []
 
     def merge_data(self, brfore_list, after_list):
         if isinstance(brfore_list, dict) and isinstance(after_list, dict):
@@ -68,39 +69,33 @@ class StoreKafka:
         wf.close()
 
         dict_diff = pd.DataFrame(self.dict_list)
-        merge_diff = dict_diff.drop_duplicates(subset=[self.prikey], keep=False)
+        merge_diff = dict_diff.drop_duplicates(subset=self.prikey, keep=False)
         distinct_list = []
-        prikeys_list = []
 
         for _, item in merge_diff.iterrows():
             distinct_list.append(item.dropna().to_dict())
 
         for dict in distinct_list:
-            prikeys_list.append(dict[self.prikey])
-            # datas = ",".join(list(dict.values()))
-            # print(datas)        #后续要写CSV
+            values = (",".join(["'"+dict[id]+"'" for id in self.prikey]))
+            self.prikeys_list.append(values)
             datas = list(dict.values())
             writer.writerow(datas)
         to_csv.close()
 
         keys_file = self.parent_path + "/save/keys/save_keys"
-        keys_datas = ", ".join(prikeys_list)
         wf = open(keys_file, "w")
-        wf.write(keys_datas)
+
+        # Oracle Values
+        print(self.prikey)
+        res = [(ele,) for ele in self.prikeys_list]
+        results = ["("+tups[0]+")" for tups in res]
+        d = "|".join(results)
+        wf.write(d)
         wf.close()
 
-class StoreDB:
-
-    def __init__(self, table):
-        self.f = OracleDB(table)
-
-    def test(self):
-        print(self.f.query())
-
-
 if __name__ == '__main__':
-    f = StoreKafka("ID")
+    pk = ['ID', 'COL1']
+    f = StoreKafka(pk)
     f.store_data()
-    # g = StoreDB("T1")
-    # g.test()
+
 

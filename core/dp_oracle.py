@@ -37,8 +37,8 @@ class OracleDB:
         return open(self.col_files, "r")
 
     def __connect(self):
-        print('连接Oracle数据库 host: {0}, port: {1}, user: {2}, passwd: {3}, db: {4}'.format(
-            self.host, self.port, self.user, self.password, self.database))
+        # print('连接Oracle数据库 host: {0}, port: {1}, user: {2}, passwd: {3}, db: {4}'.format(
+            # self.host, self.port, self.user, self.password, self.database))
         db = cx_Oracle.connect('{0}/{1}@{2}:{3}/{4}'.format(
             self.user, self.password, self.host, self.port, self.database))
         db.ping()
@@ -76,6 +76,7 @@ class OracleDB:
         return col_name1
 
     def get_data_type(self):
+        # 需要把 self.read_col 中的的date类型做转变
         values = self.get_pk_col()
         print(values)
         if values is not None:
@@ -91,21 +92,23 @@ class OracleDB:
     def query(self):
         primary_key = open(self.keys_data, "r")
         keys = primary_key.read()
-        bind_values = list(map(int, keys.split(",")))
-        cut_values = self.cut_list(bind_values, 500)
-        for value in cut_values:
-            bind_names = [":" + str(i + 1) for i in range(len(value))]
-            sql_text = "select {0} from {1} where id in (%s)" % (", ".join(bind_names))
-            sql = sql_text.format(self.read_col, self.table_name)
-            cursor = self.db.cursor()
-            cursor.execute(sql, value)
-            results = cursor.fetchall()
-            self.values_list.append(results)
-            cursor.close()
+        bind_values = list(map(str, keys.split("|")))
+        values = ",".join(bind_values)
+        # bind_names = [":" + str(i + 1) for i in range(len(bind_values))]
+        # print(bind_names)
+        cols = ",".join(self.get_pk_col())
+        sql_text = "select {0} from {1} where ("+ cols +", COL1) in (%s)" % values
+        sql = sql_text.format(self.read_col, self.table_name)
+        cursor = self.db.cursor()
+        cursor.prepare(sql)
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        self.values_list.append(results)
+        cursor.close()
         primary_key.close()
         return self.values_list
 
 if __name__ == '__main__':
-    f = OracleDB("TX")
-    g = f.get_data_type()
+    f = OracleDB("T1")
+    g = f.query()
     print(g)
