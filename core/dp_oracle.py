@@ -96,6 +96,7 @@ class OracleDB:
         # print(bind_names)
         cols = ",".join(self.get_pk_col())
         sql_text = "select {0} from {1} where ("+ cols +", COL1) in (%s) order by {2}, COL1" % values
+        print(sql_text)
         query_cols = self.read_col.replace(self.datatype, "to_char({0},'yy-mm-dd hh24:mi:ss')".format(self.datatype))
         sql = sql_text.format(query_cols, self.table_name, cols)
         cursor = self.db.cursor()

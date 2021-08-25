@@ -7,6 +7,8 @@ import json
 import csv
 import pandas as pd
 from core.dp_consume import KafkaConsumer
+from datetime import datetime, timedelta
+from pytz import timezone
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 from assets.conf_case import *
@@ -14,7 +16,9 @@ from assets.conf_case import *
 class StoreKafka:
 
     def __init__(self, primary_key:list):
-        f = KafkaConsumer(topic, begin_time, end_time)
+        self.begin = self.pk_2_utc(begin_time)
+        self.end = self.pk_2_utc(end_time)
+        f = KafkaConsumer(topic, self.begin, self.end)
         self.message = f.consume_kafka()
         self.prikey = primary_key
         self.dict_list = []
@@ -23,6 +27,12 @@ class StoreKafka:
         self.col_files = self.parent_path + "/save/col_name/tab_col"
         self.csv_file = self.parent_path + "/save/{0}.csv".format(topic)
         self.prikeys_list = []
+
+    def pk_2_utc(self, pktime_str: str) -> str:
+        now_time = datetime.strptime(pktime_str, "%Y-%m-%d %H:%M:%S")
+        utc_time = now_time - timedelta(hours=8)
+        utc = str(datetime.strptime(str(utc_time), "%Y-%m-%d %H:%M:%S"))
+        return utc
 
     def merge_data(self, brfore_list, after_list):
         if isinstance(brfore_list, dict) and isinstance(after_list, dict):
@@ -91,5 +101,3 @@ if __name__ == '__main__':
     pk = ['ID', 'COL1']
     f = StoreKafka(pk)
     f.store_data()
-
-

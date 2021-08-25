@@ -28,7 +28,7 @@ class KafkaConsumer:
         self.consumer.close()
 
     @staticmethod
-    def __str_to_timestamp(str_time, format_type='%Y-%m-%d %H:%M:%S'):
+    def __str_to_timestamp(str_time, format_type="%Y-%m-%d %H:%M:%S"):
         time_array = time.strptime(str_time, format_type)
         return int(time.mktime(time_array)) * 1000
 
