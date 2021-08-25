@@ -24,7 +24,6 @@ class OracleDB:
         self.database = db_info[4]
         self.table_name = table_name
         self.db = self.__connect()
-        self.values_list = []
 
     def __del__(self):
         try:
@@ -103,10 +102,11 @@ class OracleDB:
         cursor.prepare(sql)
         cursor.execute(sql)
         results = cursor.fetchall()
-        self.values_list.append(results)
         cursor.close()
         primary_key.close()
-        return self.values_list
+        for row in results:
+            print(row)
+        # return results
 
 if __name__ == '__main__':
     f = OracleDB("T1")
