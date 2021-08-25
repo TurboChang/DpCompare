@@ -16,8 +16,8 @@ from assets.conf_case import *
 class StoreKafka:
 
     def __init__(self, primary_key:list):
-        self.begin = self.pk_2_utc(begin_time)
-        self.end = self.pk_2_utc(end_time)
+        self.begin = self.begin_2_utc(begin_time)
+        self.end = self.end_2_utc(end_time)
         f = KafkaConsumer(topic, self.begin, self.end)
         self.message = f.consume_kafka()
         self.prikey = primary_key
@@ -28,9 +28,15 @@ class StoreKafka:
         self.csv_file = self.parent_path + "/save/{0}.csv".format(topic)
         self.prikeys_list = []
 
-    def pk_2_utc(self, pktime_str: str) -> str:
+    def begin_2_utc(self, pktime_str: str) -> str:
         now_time = datetime.strptime(pktime_str, "%Y-%m-%d %H:%M:%S")
-        utc_time = now_time - timedelta(hours=8)
+        utc_time = now_time - timedelta(hours=8) - timedelta(hours=range_time)
+        utc = str(datetime.strptime(str(utc_time), "%Y-%m-%d %H:%M:%S"))
+        return utc
+
+    def end_2_utc(self, pktime_str: str) -> str:
+        now_time = datetime.strptime(pktime_str, "%Y-%m-%d %H:%M:%S")
+        utc_time = now_time - timedelta(hours=8) + timedelta(hours=range_time)
         utc = str(datetime.strptime(str(utc_time), "%Y-%m-%d %H:%M:%S"))
         return utc
 
