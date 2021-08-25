@@ -4,7 +4,7 @@
 import time
 import os
 import sys
-from confluent_kafka import Consumer, TopicPartition, KafkaException, KafkaError
+from confluent_kafka import Consumer, TopicPartition
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 from assets.conf_case import *

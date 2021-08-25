@@ -25,8 +25,9 @@ INNER JOIN ALL_CONS_COLUMNS KU
        AND KU.TABLE_NAME = UPPER('{0}')
        AND KU.OWNER = UPPER('"""+ username +"""')"""
 col_data_type = """
-SELECT DATA_TYPE FROM ALL_TAB_COLUMNS KU 
+SELECT COLUMN_NAME,
+       DATA_TYPE 
+ FROM ALL_TAB_COLUMNS KU 
 WHERE KU.TABLE_NAME = UPPER('{0}')
-  AND KU.COLUMN_NAME IN (%s)
   AND KU.OWNER = UPPER('""" + username + """')"""
 

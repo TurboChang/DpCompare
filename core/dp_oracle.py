@@ -4,6 +4,7 @@
 import os
 import sys
 import cx_Oracle
+import csv
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 from assets.conf_case import *
@@ -24,6 +25,8 @@ class OracleDB:
         self.database = db_info[4]
         self.table_name = table_name
         self.db = self.__connect()
+        self.datatype = self.get_data_type()
+        self.csv_file = self.parent_path + "/save/{0}.csv".format(self.table_name)
 
     def __del__(self):
         try:
@@ -76,17 +79,13 @@ class OracleDB:
 
     def get_data_type(self):
         # 需要把 self.read_col 中的的date类型做转变
-        values = self.get_pk_col()
-        print(values)
-        if values is not None:
-            bind_names = [":" + str(i + 1) for i in range(len(values))]
-            sql = col_data_type.format(self.table_name) % (",".join(bind_names))
-            cursor = self.db.cursor()
-            cursor.execute(sql, values)
-            res = cursor.fetchall()
-            results = ",".join([",".join(x) for x in res])
-            cursor.close()
-            return results
+        sql = col_data_type.format(self.table_name)
+        datatype = self.__execute(sql)
+        for col in datatype:
+            col_name = col[0]
+            data_type = col[1]
+            if data_type == "DATE":
+                return col_name
 
     def query(self):
         primary_key = open(self.keys_data, "r")
@@ -96,19 +95,27 @@ class OracleDB:
         # bind_names = [":" + str(i + 1) for i in range(len(bind_values))]
         # print(bind_names)
         cols = ",".join(self.get_pk_col())
-        sql_text = "select {0} from {1} where ("+ cols +", COL1) in (%s)" % values
-        sql = sql_text.format(self.read_col, self.table_name)
+        sql_text = "select {0} from {1} where ("+ cols +", COL1) in (%s) order by {2}, COL1" % values
+        query_cols = self.read_col.replace(self.datatype, "to_char({0},'yy-mm-dd hh24:mi:ss')".format(self.datatype))
+        sql = sql_text.format(query_cols, self.table_name, cols)
         cursor = self.db.cursor()
         cursor.prepare(sql)
         cursor.execute(sql)
         results = cursor.fetchall()
         cursor.close()
         primary_key.close()
+
+        # Persistence Oracle to CSV
+        to_csv = open(self.csv_file, "w", encoding="utf-8")
+        writer = csv.writer(to_csv)
+        print(self.read_col)
+        writer.writerow(self.read_col)  # write csv title from data table columns
         for row in results:
-            print(row)
-        # return results
+            writer.writerow(row)
+        to_csv.close()
 
 if __name__ == '__main__':
     f = OracleDB("T1")
     g = f.query()
+    # g = f.get_data_type()
     print(g)
