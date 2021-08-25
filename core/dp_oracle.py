@@ -108,8 +108,7 @@ class OracleDB:
         # Persistence Oracle to CSV
         to_csv = open(self.csv_file, "w", encoding="utf-8")
         writer = csv.writer(to_csv)
-        print(self.read_col)
-        writer.writerow(self.read_col)  # write csv title from data table columns
+        # writer.writerow(self.read_col)  # write csv title from data table columns
         for row in results:
             writer.writerow(row)
         to_csv.close()

@@ -62,7 +62,7 @@ class StoreKafka:
         keys = self.keys_list[0]
         to_csv = open(self.csv_file, "w", encoding="utf-8")
         writer = csv.writer(to_csv)
-        writer.writerow(keys)   # write csv title from data table columns
+        # writer.writerow(keys)   # write csv title from data table columns
         keys = ",".join(str(x) for x in keys)
         wf = open(self.col_files, "w")
         wf.write(keys)
