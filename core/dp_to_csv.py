@@ -7,7 +7,7 @@ import json
 import csv
 import pandas as pd
 from core.dp_consume import KafkaConsumer
-from datetime import datetime, timedelta
+from core.dp_param import pk_2_utc as utc
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 from assets.conf_case import *
@@ -15,8 +15,8 @@ from assets.conf_case import *
 class StoreKafka:
 
     def __init__(self, primary_key:list):
-        self.begin = self.__begin_2_utc(begin_time)
-        self.end = self.__end_2_utc(end_time)
+        self.begin = utc(begin_time, 0, "begin")
+        self.end = utc(end_time, 0, "end")
         f = KafkaConsumer(topic, self.begin, self.end)
         self.message = f.consume_kafka()
         self.prikey = primary_key
@@ -26,18 +26,6 @@ class StoreKafka:
         self.col_files = self.parent_path + "/save/col_name/tab_col"
         self.csv_file = self.parent_path + "/save/{0}.csv".format(topic)
         self.prikeys_list = []
-
-    def __begin_2_utc(self, pktime_str: str) -> str:
-        now_time = datetime.strptime(pktime_str, "%Y-%m-%d %H:%M:%S")
-        utc_time = now_time - timedelta(hours=0.25) - timedelta(hours=range_time)
-        utc = str(datetime.strptime(str(utc_time), "%Y-%m-%d %H:%M:%S"))
-        return utc
-
-    def __end_2_utc(self, pktime_str: str) -> str:
-        now_time = datetime.strptime(pktime_str, "%Y-%m-%d %H:%M:%S")
-        utc_time = now_time - timedelta(hours=0.25) + timedelta(hours=range_time)
-        utc = str(datetime.strptime(str(utc_time), "%Y-%m-%d %H:%M:%S"))
-        return utc
 
     def merge_data(self, brfore_list, after_list):
         if isinstance(brfore_list, dict) and isinstance(after_list, dict):

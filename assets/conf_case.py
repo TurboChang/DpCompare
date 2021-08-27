@@ -6,7 +6,7 @@ bootstrap_servers = "59.110.219.31:9092"
 topic = "dp_agent_1_DP_TEST_T1"
 begin_time = "2021-08-20 15:00:45"
 end_time = "2021-08-20 15:06:55"
-range_time = 1
+range_time = 0.25
 
 # ORACLE
 host = "39.105.17.117"
