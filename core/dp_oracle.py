@@ -5,9 +5,11 @@ import os
 import sys
 import cx_Oracle
 import csv
+
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 from assets.conf_case import *
+
 
 class OracleDB:
     ALIAS = 'ORACLE'
@@ -40,7 +42,7 @@ class OracleDB:
 
     def __connect(self):
         # print('连接Oracle数据库 host: {0}, port: {1}, user: {2}, passwd: {3}, db: {4}'.format(
-            # self.host, self.port, self.user, self.password, self.database))
+        # self.host, self.port, self.user, self.password, self.database))
         db = cx_Oracle.connect('{0}/{1}@{2}:{3}/{4}'.format(
             self.user, self.password, self.host, self.port, self.database))
         db.ping()
@@ -88,34 +90,43 @@ class OracleDB:
                 return col_name
 
     def query(self):
+        results = []
         primary_key = open(self.keys_data, "r")
         keys = primary_key.read()
-        bind_values = list(map(str, keys.split("|")))
-        values = ",".join(bind_values)
-        # bind_names = [":" + str(i + 1) for i in range(len(bind_values))]
-        # print(bind_names)
         cols = ",".join(self.get_pk_col())
-        sql_text = "select {0} from {1} where ("+ cols +", COL1) in (%s) order by {2}, COL1" % values
-        print(sql_text)
-        query_cols = self.read_col.replace(self.datatype, "to_char({0},'yy-mm-dd hh24:mi:ss')".format(self.datatype))
-        sql = sql_text.format(query_cols, self.table_name, cols)
-        cursor = self.db.cursor()
-        cursor.prepare(sql)
-        cursor.execute(sql)
-        results = cursor.fetchall()
-        cursor.close()
+        bind_values = list(map(str, keys.split("|")))
+        cut_bind_values = self.cut_list(bind_values, 1000)
+        for batch in cut_bind_values:
+            values = ",".join(batch)
+            sql_text = "select {0} from {1} where ({2}) in (%s) order by {2}" % values
+            query_cols = self.read_col.replace(self.datatype,
+                                               "to_char({0},'yy-mm-dd hh24:mi:ss')".format(self.datatype))
+            sql = sql_text.format(query_cols, self.table_name, cols)
+            cursor = self.db.cursor()
+            cursor.prepare(sql)
+            cursor.execute(sql)
+            res = cursor.fetchall()
+            results.append(res)
+            cursor.close()
         primary_key.close()
 
         # Persistence Oracle to CSV
         to_csv = open(self.csv_file, "w", encoding="utf-8")
         writer = csv.writer(to_csv)
-        # writer.writerow(self.read_col)  # write csv title from data table columns
-        for row in results:
-            writer.writerow(row)
+        title = self.read_col.split(",")
+        writer.writerow(title)  # write csv title from data table columns
+        for rows in results:
+            for row in rows:
+                if not (row is None):
+                    print(row)
+                    writer.writerow(row)
+                else:
+                    print("Null")
         to_csv.close()
 
+
 if __name__ == '__main__':
-    f = OracleDB("T1")
+    f = OracleDB("TX")
     g = f.query()
     # g = f.get_data_type()
     print(g)

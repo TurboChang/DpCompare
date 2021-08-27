@@ -8,7 +8,6 @@ import csv
 import pandas as pd
 from core.dp_consume import KafkaConsumer
 from datetime import datetime, timedelta
-from pytz import timezone
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 from assets.conf_case import *
@@ -16,8 +15,8 @@ from assets.conf_case import *
 class StoreKafka:
 
     def __init__(self, primary_key:list):
-        self.begin = self.begin_2_utc(begin_time)
-        self.end = self.end_2_utc(end_time)
+        self.begin = self.__begin_2_utc(begin_time)
+        self.end = self.__end_2_utc(end_time)
         f = KafkaConsumer(topic, self.begin, self.end)
         self.message = f.consume_kafka()
         self.prikey = primary_key
@@ -28,15 +27,15 @@ class StoreKafka:
         self.csv_file = self.parent_path + "/save/{0}.csv".format(topic)
         self.prikeys_list = []
 
-    def begin_2_utc(self, pktime_str: str) -> str:
+    def __begin_2_utc(self, pktime_str: str) -> str:
         now_time = datetime.strptime(pktime_str, "%Y-%m-%d %H:%M:%S")
-        utc_time = now_time - timedelta(hours=8) - timedelta(hours=range_time)
+        utc_time = now_time - timedelta(hours=0.25) - timedelta(hours=range_time)
         utc = str(datetime.strptime(str(utc_time), "%Y-%m-%d %H:%M:%S"))
         return utc
 
-    def end_2_utc(self, pktime_str: str) -> str:
+    def __end_2_utc(self, pktime_str: str) -> str:
         now_time = datetime.strptime(pktime_str, "%Y-%m-%d %H:%M:%S")
-        utc_time = now_time - timedelta(hours=8) + timedelta(hours=range_time)
+        utc_time = now_time - timedelta(hours=0.25) + timedelta(hours=range_time)
         utc = str(datetime.strptime(str(utc_time), "%Y-%m-%d %H:%M:%S"))
         return utc
 
@@ -76,9 +75,10 @@ class StoreKafka:
 
         # Persistence Kafka to CSV
         keys = self.keys_list[0]
+        print(keys)
         to_csv = open(self.csv_file, "w", encoding="utf-8")
         writer = csv.writer(to_csv)
-        # writer.writerow(keys)   # write csv title from data table columns
+        writer.writerow(keys)   # write csv title from data table columns
         keys = ",".join(str(x) for x in keys)
         wf = open(self.col_files, "w")
         wf.write(keys)
@@ -101,9 +101,3 @@ class StoreKafka:
         d = "|".join(results)
         wf.write(d)
         wf.close()
-
-
-if __name__ == '__main__':
-    pk = ['ID', 'COL1']
-    f = StoreKafka(pk)
-    f.store_data()
