@@ -18,7 +18,15 @@ db_info = [host, port, username, password, database]
 # tab_name = "T1"
 tab_name = "T_TIMESTAMP"
 column_name = "TIME3"
-tz_sql = """select """
+c_type = """
+        SELECT COLUMN_NAME, 
+               DATA_TYPE
+FROM ALL_TAB_COLUMNS
+WHERE TABLE_NAME = UPPER('{0}')
+  AND OWNER = UPPER('{1}')
+  AND COLUMN_NAME = '{2}'
+ORDER BY COLUMN_ID
+"""
 primary_key = """
 SELECT 
      COLUMN_NAME

@@ -80,7 +80,9 @@ class OracleDB:
         return col_name1
 
     def get_tz(self):
-        sql = col_data_type.format(self.table_name)
+        sql = c_type.format(tab_name, username, column_name)
+        data_type = self.__execute(sql)
+        return data_type
 
     def get_data_type(self):
         # 需要把 self.read_col 中的的date类型做转变
