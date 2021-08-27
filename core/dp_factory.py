@@ -11,6 +11,7 @@ from assets.conf_case import *
 
 f = Ora(tab_name)
 pk = f.get_pk_col()
+d_type = f.get_data_type()
 
-g = SK(pk)
-g.store_data()
+# g = SK(pk)
+# g.store_data()

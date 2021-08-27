@@ -79,6 +79,9 @@ class OracleDB:
         col_name1 = [",".join(x) for x in col_name]
         return col_name1
 
+    def get_tz(self):
+        sql = col_data_type.format(self.table_name)
+
     def get_data_type(self):
         # 需要把 self.read_col 中的的date类型做转变
         sql = col_data_type.format(self.table_name)

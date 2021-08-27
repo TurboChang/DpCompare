@@ -8,7 +8,7 @@ begin_time = "2021-08-20 15:00:45"
 end_time = "2021-08-20 15:06:55"
 range_time = 0.25
 
-# ORACLE
+# ORACL
 host = "39.105.17.117"
 port = 1521
 username = "dp_test"
@@ -16,8 +16,9 @@ password = "123456"
 database = "orcl"
 db_info = [host, port, username, password, database]
 # tab_name = "T1"
-tab_name = "TX"
-column_name = ""
+tab_name = "T_TIMESTAMP"
+column_name = "TIME3"
+tz_sql = """select """
 primary_key = """
 SELECT 
      COLUMN_NAME
