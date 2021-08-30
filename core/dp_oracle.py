@@ -88,6 +88,7 @@ class OracleDB:
         # 需要把 self.read_col 中的的date类型做转变
         sql = col_data_type.format(self.table_name)
         datatype = self.__execute(sql)
+        print(datatype)
         for col in datatype:
             col_name = col[0]
             data_type = col[1]
@@ -103,6 +104,7 @@ class OracleDB:
         cut_bind_values = self.cut_list(bind_values, 1000)
         for batch in cut_bind_values:
             values = ",".join(batch)
+            # modify sql to between begin and end time
             sql_text = "select {0} from {1} where ({2}) in (%s) order by {2}" % values
             query_cols = self.read_col.replace(self.datatype,
                                                "to_char({0},'yy-mm-dd hh24:mi:ss')".format(self.datatype))
@@ -130,8 +132,8 @@ class OracleDB:
         to_csv.close()
 
 
-if __name__ == '__main__':
-    f = OracleDB("TX")
-    g = f.query()
-    # g = f.get_data_type()
-    print(g)
+# if __name__ == '__main__':
+#     f = OracleDB("TX")
+#     g = f.query()
+#     # g = f.get_data_type()
+#     print(g)

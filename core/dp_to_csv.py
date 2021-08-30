@@ -62,6 +62,7 @@ class StoreKafka:
                         self.dict_list.append(where)
 
         # Persistence Kafka to CSV
+        print(self.keys_list)
         keys = self.keys_list[0]
         print(keys)
         to_csv = open(self.csv_file, "w", encoding="utf-8")
