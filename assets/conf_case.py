@@ -16,8 +16,8 @@ password = "123456"
 database = "orcl"
 db_info = [host, port, username, password, database]
 # tab_name = "T1"
-tab_name = "T_TIMESTAMP"
-column_name = "TIME3"
+tab_name = "T1"
+column_name = "col_ltz"
 c_type = """
         SELECT COLUMN_NAME, 
                DATA_TYPE

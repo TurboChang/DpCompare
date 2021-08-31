@@ -58,17 +58,27 @@ class OracleDB:
         os.rename("%s.bak" % file, file)
 
     def decide_tz_cols(self):
+        oldcols = []
+        newcols = []
         sql = col_data_type.format(self.table_name)
         datatype = self.__execute(sql)
         for col in datatype:
             col_name = col[0]
             data_type = col[1]
-            if data_type[0:9] == "TIMESTAMP":
+            if not data_type is None:
+                newcols.append(col_name)
+            elif data_type[0:9] == "TIMESTAMP":
                 new_col = "to_char({0},'yy-mm-dd hh24:mi:ss.ff')".format(col_name)
-                self.alter(self.col_files, col_name, new_col)
+                print(new_col)
+                oldcols.append(col_name)
+                newcols.append(new_col)
             elif data_type == "DATE":
                 new_col = "to_char({0},'yy-mm-dd hh24:mi:ss')".format(col_name)
-                self.alter(self.col_files, col_name, new_col)
+                print(new_col)
+                oldcols.append(col_name)
+                newcols.append(new_col)
+        print(oldcols)
+        print(newcols)
 
     def query(self):
         read_file = open(self.col_files, "r")
@@ -79,15 +89,16 @@ class OracleDB:
         set_tz = "alter session set time_zone = '{0}'".format(db_tz[0][0])
         cursor = self.db.cursor()
         cursor.execute(set_tz)
-        sql = "select {0} from {1}".format(cols_name, self.table_name)
+        sql = "select {0} from {1} order by ID".format(cols_name, self.table_name)
+        print(sql)
         cursor.execute(sql)
         res = cursor.fetchall()
         return res
 
 if __name__ == '__main__':
-    f = OracleDB("T_TIMESTAMP")
+    f = OracleDB(tab_name)
     # d = f.get_pk_col()
     f.decide_tz_cols()
     # print(d)
-    h = f.query()
-    print(h)
+    # h = f.query()
+    # print(h)

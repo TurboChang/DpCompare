@@ -11,11 +11,11 @@ from assets.conf_case import *
 
 f = Ora(tab_name)
 pk = f.get_pk_col()
-print(pk)
+# print(pk)
 # d_type = f.get_tz()
 # print(d_type)
 # o_type = f.get_data_type()
 # print(o_type)
 
-# g = SK(pk)
-# g.store_data()
+g = SK(pk)
+g.store_data()
