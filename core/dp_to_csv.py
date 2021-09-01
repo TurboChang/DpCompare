@@ -8,6 +8,7 @@ import csv
 import pandas as pd
 from core.dp_consume import KafkaConsumer
 from core.dp_param import pk_2_utc as utc
+from core.ora import OracleDB as ora
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 from assets.conf_case import *
@@ -15,9 +16,11 @@ from assets.conf_case import *
 class StoreKafka:
 
     def __init__(self, primary_key:list):
-        self.begin = utc(begin_time, 0, "begin")
-        self.end = utc(end_time, 0, "end")
-        f = KafkaConsumer(topic, self.begin, self.end)
+        self.begin = utc(begin_time, 8, "begin")
+        self.end = utc(end_time, 8, "end")
+        # begin_time = "2021-08-31 18:00:00"
+        # end_time = "2021-08-31 20:00:00"
+        f = KafkaConsumer(topic, begin_time, end_time)
         self.message = f.consume_kafka()
         self.prikey = primary_key
         self.dict_list = []
@@ -90,3 +93,11 @@ class StoreKafka:
         d = "|".join(results)
         wf.write(d)
         wf.close()
+
+if __name__ == '__main__':
+    o = ora(tab_name)
+    pk_list = o.get_pk_col()
+    print(pk_list)
+    f = StoreKafka(pk_list)
+    g = f.store_data()
+    print(g)

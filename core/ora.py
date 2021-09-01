@@ -65,16 +65,12 @@ class OracleDB:
         for col in datatype:
             col_name = col[0]
             data_type = col[1]
-            if not data_type is None:
-                newcols.append(col_name)
-            elif data_type[0:9] == "TIMESTAMP":
+            if data_type[0:9] == "TIMESTAMP":
                 new_col = "to_char({0},'yy-mm-dd hh24:mi:ss.ff')".format(col_name)
-                print(new_col)
                 oldcols.append(col_name)
                 newcols.append(new_col)
             elif data_type == "DATE":
                 new_col = "to_char({0},'yy-mm-dd hh24:mi:ss')".format(col_name)
-                print(new_col)
                 oldcols.append(col_name)
                 newcols.append(new_col)
         print(oldcols)
@@ -97,8 +93,8 @@ class OracleDB:
 
 if __name__ == '__main__':
     f = OracleDB(tab_name)
-    # d = f.get_pk_col()
+    d = f.get_pk_col()
     f.decide_tz_cols()
-    # print(d)
+    print(d)
     # h = f.query()
     # print(h)

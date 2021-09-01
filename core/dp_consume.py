@@ -67,11 +67,11 @@ class KafkaConsumer:
 
     def run(self):
         print(self.__timestamp_to_offset())
-        print(type(self.consume_kafka()[0]))
-        return self.consume_kafka()
+        # print(type(self.consume_kafka()[0]))
+        # return self.consume_kafka()
 
 if __name__ == '__main__':
-    f = KafkaConsumer(topic, begin_time, end_time)
-    # g = f.run()
+    f = KafkaConsumer(topic, "2021-08-31 07:15:00", "2021-08-31 08:35:00")
+    f.run()
     g = f.consume_kafka()
     print(g)
