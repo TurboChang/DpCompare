@@ -4,11 +4,13 @@
 import os
 import re
 import sys
+
 import cx_Oracle
-import csv
+
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 from assets.conf_case import *
+
 
 class OracleDB:
     ALIAS = 'ORACLE'
@@ -24,7 +26,7 @@ class OracleDB:
         self.table_name = table_name
         self.db = self.__connect()
         self.csv_file = self.parent_path + "/save/{0}.csv".format(self.table_name)
-        self.col_files = self.parent_path + "/save/col_name/{0}_COLS".format(self.table_name)
+        self.col_files = self.parent_path + "/save/col_name/tab_col"
 
     def __del__(self):
         try:
@@ -58,22 +60,26 @@ class OracleDB:
         os.rename("%s.bak" % file, file)
 
     def decide_tz_cols(self):
-        oldcols = []
         newcols = []
         sql = col_data_type.format(self.table_name)
         datatype = self.__execute(sql)
+        read_file = open(self.col_files, "r")
+        cols_rule = read_file.read()
+        rule_list = cols_rule.split(',')
+        rule_dict = {}
+        for e in rule_list:
+            rule_dict[e] = ""   # make dict value is null
         for col in datatype:
             col_name = col[0]
             data_type = col[1]
+            new_col = col_name   # make new variable
             if data_type[0:9] == "TIMESTAMP":
                 new_col = "to_char({0},'yy-mm-dd hh24:mi:ss.ff')".format(col_name)
-                oldcols.append(col_name)
-                newcols.append(new_col)
             elif data_type == "DATE":
                 new_col = "to_char({0},'yy-mm-dd hh24:mi:ss')".format(col_name)
-                oldcols.append(col_name)
-                newcols.append(new_col)
-        print(oldcols)
+            rule_dict[col_name] = new_col   # make dict value is col_name
+        for e in rule_list:
+            newcols.append(rule_dict[e])
         print(newcols)
 
     def query(self):
@@ -90,6 +96,7 @@ class OracleDB:
         cursor.execute(sql)
         res = cursor.fetchall()
         return res
+
 
 if __name__ == '__main__':
     f = OracleDB(tab_name)

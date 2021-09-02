@@ -18,8 +18,6 @@ class StoreKafka:
     def __init__(self, primary_key:list):
         self.begin = utc(begin_time, 8, "begin")
         self.end = utc(end_time, 8, "end")
-        # begin_time = "2021-08-31 18:00:00"
-        # end_time = "2021-08-31 20:00:00"
         f = KafkaConsumer(topic, begin_time, end_time)
         self.message = f.consume_kafka()
         self.prikey = primary_key
@@ -65,9 +63,7 @@ class StoreKafka:
                         self.dict_list.append(where)
 
         # Persistence Kafka to CSV
-        print(self.keys_list)
         keys = self.keys_list[0]
-        print(keys)
         to_csv = open(self.csv_file, "w", encoding="utf-8")
         writer = csv.writer(to_csv)
         writer.writerow(keys)   # write csv title from data table columns
@@ -99,5 +95,4 @@ if __name__ == '__main__':
     pk_list = o.get_pk_col()
     print(pk_list)
     f = StoreKafka(pk_list)
-    g = f.store_data()
-    print(g)
+    f.store_data()
