@@ -63,6 +63,7 @@ class OracleDB:
         newcols = []
         sql = col_data_type.format(self.table_name)
         datatype = self.__execute(sql)
+        print(datatype)
         read_file = open(self.col_files, "r")
         cols_rule = read_file.read()
         rule_list = cols_rule.split(',')
@@ -73,25 +74,25 @@ class OracleDB:
             col_name = col[0]
             data_type = col[1]
             new_col = col_name   # make new variable
-            if data_type[0:9] == "TIMESTAMP":
+            if data_type[0:9] == "TIMESTAMP":   # 需要处理timestamp tz的数据类型
                 new_col = "to_char({0},'yy-mm-dd hh24:mi:ss.ff')".format(col_name)
             elif data_type == "DATE":
                 new_col = "to_char({0},'yy-mm-dd hh24:mi:ss')".format(col_name)
             rule_dict[col_name] = new_col   # make dict value is col_name
         for e in rule_list:
             newcols.append(rule_dict[e])
-        print(newcols)
+        # print(newcols)
+        return newcols
 
     def query(self):
-        read_file = open(self.col_files, "r")
-        cols_name = read_file.read()
-        print(cols_name)
+        cols_name = ",".join(self.decide_tz_cols())
+        pk = ",".join(self.get_pk_col())
         db_tz_sql = "select dbtimezone from dual"
         db_tz = self.__execute(db_tz_sql)
         set_tz = "alter session set time_zone = '{0}'".format(db_tz[0][0])
         cursor = self.db.cursor()
         cursor.execute(set_tz)
-        sql = "select {0} from {1} order by ID".format(cols_name, self.table_name)
+        sql = "select {0} from {1} order by {2}".format(cols_name, self.table_name, pk)
         print(sql)
         cursor.execute(sql)
         res = cursor.fetchall()
@@ -100,8 +101,8 @@ class OracleDB:
 
 if __name__ == '__main__':
     f = OracleDB(tab_name)
-    d = f.get_pk_col()
-    f.decide_tz_cols()
-    print(d)
-    # h = f.query()
-    # print(h)
+    # d = f.get_pk_col()
+    # f.decide_tz_cols()
+    # print(d)
+    h = f.query()
+    print(h)
