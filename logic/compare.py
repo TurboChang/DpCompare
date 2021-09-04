@@ -17,19 +17,20 @@ class CompareCSV:
         ora = Ora(tab_name)
         self.pk_list = ora.get_pk_col()
         self.pks = ",".join(self.pk_list)
+        self.ora_csv = self.csv_path + tab_name + ".csv"
+        self.kaf_csv = self.csv_path + topic + ".csv"
 
     def compare(self):
-        ora_csv = open(self.csv_path + tab_name + ".csv", "r")
-        kaf_csv = open(self.csv_path + topic + ".csv", "r")
-        source = load_csv(ora_csv, key=self.pks)
-        target = load_csv(kaf_csv, key=self.pks)
+        ora_csv = open(self.ora_csv, "r")
+        kaf_csv = open(self.kaf_csv, "r")
+        source = load_csv(ora_csv, key=None)
+        target = load_csv(kaf_csv, key=None)
         if target != {}:
             print("TARGET IS NOT NULL.")
             diff = compare(source, target)
             diff_str = "{'added': [], 'removed': [], 'changed': [], 'columns_added': [], 'columns_removed': []}"
             if str(diff) != diff_str:
                 print(diff)
-                # self._write_report(report_file, content, "a")
         ora_csv.close()
         kaf_csv.close()
 
