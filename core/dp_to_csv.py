@@ -8,7 +8,7 @@ import csv
 import pandas as pd
 from core.dp_consume import KafkaConsumer
 from core.dp_param import pk_2_utc as utc
-from core.ora import OracleDB as ora
+from core.dp_ora import OracleDB as ora
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 from assets.conf_case import *
@@ -83,12 +83,12 @@ class StoreKafka:
 
         # Oracle PK Column Values
         keys_file = self.parent_path + "/save/keys/save_keys"
-        wf = open(keys_file, "w")
+        kwf = open(keys_file, "w")
         res = [(ele,) for ele in self.prikeys_list]
         results = ["("+tups[0]+")" for tups in res]
         d = "|".join(results)
-        wf.write(d)
-        wf.close()
+        kwf.write(d)
+        kwf.close()
 
 if __name__ == '__main__':
     o = ora(tab_name)

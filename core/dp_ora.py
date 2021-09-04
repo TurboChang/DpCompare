@@ -4,6 +4,7 @@
 import os
 import re
 import sys
+import csv
 import cx_Oracle
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
@@ -95,10 +96,14 @@ class OracleDB:
         sql = "select {0} from {1} order by {2}".format(cols_name, self.table_name, pk)
         cursor.execute(sql)
         res = cursor.fetchall()
-        # return res
+        to_csv = open(self.csv_file, "w", encoding="utf-8")
+        writer = csv.writer(to_csv)
+        writer.writerow(open(self.col_files, "r").read().split(","))  # write csv title from data table columns
         for row in res:
-            result = ",".join('%s' %id for id in row)
-            print(result)
+            # result = ",".join('%s' %id for id in row)
+            result = list(row)
+            writer.writerow(result)
+        to_csv.close()
 
 
 if __name__ == '__main__':
