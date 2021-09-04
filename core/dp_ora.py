@@ -75,11 +75,11 @@ class OracleDB:
             tz_obj = re.search(r"WITH TIME ZONE", data_type)    # match timestamp with time zone type
             if data_type[0:9] == "TIMESTAMP":   # 需要处理timestamp tz的数据类型
                 if tz_obj:
-                    new_col = "to_char({0},'yy-mm-dd hh24:mi:ss.ff9 tzh:tzm')".format(col_name)
+                    new_col = "to_char({0},'yyyy-mm-dd hh24:mi:ss.ff9 tzh:tzm')".format(col_name)
                 else:
-                    new_col = "to_char({0},'yy-mm-dd hh24:mi:ss.ff9')".format(col_name)
+                    new_col = "to_char({0},'yyyy-mm-dd hh24:mi:ss.ff9')".format(col_name)
             elif data_type == "DATE":
-                new_col = "to_char({0},'yy-mm-dd hh24:mi:ss')".format(col_name)
+                new_col = "to_char({0},'yyyy-mm-dd hh24:mi:ss')".format(col_name)
             rule_dict[col_name] = new_col   # make dict value is col_name
         for e in rule_list:
             newcols.append(rule_dict[e])
@@ -94,6 +94,7 @@ class OracleDB:
         cursor = self.db.cursor()
         cursor.execute(set_tz)
         sql = "select {0} from {1} order by {2}".format(cols_name, self.table_name, pk)
+        print(sql)
         cursor.execute(sql)
         res = cursor.fetchall()
         to_csv = open(self.csv_file, "w", encoding="utf-8")
