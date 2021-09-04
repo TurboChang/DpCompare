@@ -26,7 +26,6 @@ class CompareCSV:
         source = load_csv(ora_csv, key=None)
         target = load_csv(kaf_csv, key=None)
         if target != {}:
-            print("TARGET IS NOT NULL.")
             diff = compare(source, target)
             diff_str = "{'added': [], 'removed': [], 'changed': [], 'columns_added': [], 'columns_removed': []}"
             if str(diff) != diff_str:
