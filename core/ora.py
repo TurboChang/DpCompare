@@ -4,9 +4,7 @@
 import os
 import re
 import sys
-
 import cx_Oracle
-
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 from assets.conf_case import *
@@ -63,25 +61,27 @@ class OracleDB:
         newcols = []
         sql = col_data_type.format(self.table_name)
         datatype = self.__execute(sql)
-        print(datatype)
         read_file = open(self.col_files, "r")
         cols_rule = read_file.read()
         rule_list = cols_rule.split(',')
         rule_dict = {}
         for e in rule_list:
-            rule_dict[e] = ""   # make dict value is null
+            rule_dict[e] = ""   # make null dict
         for col in datatype:
             col_name = col[0]
             data_type = col[1]
-            new_col = col_name   # make new variable
+            new_col = col_name   # make new variable`
+            tz_obj = re.search(r"WITH TIME ZONE", data_type)    # match timestamp with time zone type
             if data_type[0:9] == "TIMESTAMP":   # 需要处理timestamp tz的数据类型
-                new_col = "to_char({0},'yy-mm-dd hh24:mi:ss.ff')".format(col_name)
+                if tz_obj:
+                    new_col = "to_char({0},'yy-mm-dd hh24:mi:ss.ff9 tzh:tzm')".format(col_name)
+                else:
+                    new_col = "to_char({0},'yy-mm-dd hh24:mi:ss.ff9')".format(col_name)
             elif data_type == "DATE":
                 new_col = "to_char({0},'yy-mm-dd hh24:mi:ss')".format(col_name)
             rule_dict[col_name] = new_col   # make dict value is col_name
         for e in rule_list:
             newcols.append(rule_dict[e])
-        # print(newcols)
         return newcols
 
     def query(self):
@@ -93,10 +93,12 @@ class OracleDB:
         cursor = self.db.cursor()
         cursor.execute(set_tz)
         sql = "select {0} from {1} order by {2}".format(cols_name, self.table_name, pk)
-        print(sql)
         cursor.execute(sql)
         res = cursor.fetchall()
-        return res
+        # return res
+        for row in res:
+            result = ",".join('%s' %id for id in row)
+            print(result)
 
 
 if __name__ == '__main__':
