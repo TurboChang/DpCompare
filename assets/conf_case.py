@@ -43,3 +43,24 @@ SELECT COLUMN_NAME,
 WHERE KU.TABLE_NAME = UPPER('{0}')
   AND KU.OWNER = UPPER('""" + username + """')"""
 
+# Mail
+host = "smtp.exmail.qq.com"
+subject = u"DataPipeline Agent-长测数据对比差异报告"
+to_mail = ["clx@datapipeline.com"]
+cc_mail = ["hanlin@datapipeline.com"]
+from_mail = "clx@datapipeline.com"
+mail_content ="""<table width="1500" border="0" cellspacing="0" cellpadding="4">
+        <tr>
+            <td bgcolor="CECFAD" headers="20" style="font-size: 14px">
+                <br>*差异数据</br>
+            </td>
+        </tr>
+        <tr>
+            <td bgcolor="#EFEBDE" height="300" style="font-size: 13px">
+                <br>差异明细:</br>
+                {0}
+            </td>
+        </tr>
+    </table>
+        """
+
