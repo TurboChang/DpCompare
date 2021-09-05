@@ -19,6 +19,13 @@ class CompareCSV:
         self.pks = ",".join(self.pk_list)
         self.ora_csv = self.csv_path + tab_name + ".csv"
         self.kaf_csv = self.csv_path + topic + ".csv"
+        self.report_file = os.path.dirname(self.current_path) + "/report"
+
+    def __del__(self):
+        pass
+
+    def write_report(self):
+
 
     def compare(self):
         ora_csv = open(self.ora_csv, "r")
@@ -36,5 +43,6 @@ class CompareCSV:
 
 if __name__ == '__main__':
     f = CompareCSV()
-    g = f.compare()
+    # g = f.compare()
+    g = f.write_report()
     print(g)
