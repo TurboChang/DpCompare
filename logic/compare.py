@@ -10,6 +10,7 @@ from assets.conf_case import *
 from core.dp_ora import OracleDB as Ora
 
 class CompareCSV:
+    alias = "COMPARE"
 
     def __init__(self):
         self.current_path = os.path.dirname(__file__)
@@ -19,13 +20,14 @@ class CompareCSV:
         self.pks = ",".join(self.pk_list)
         self.ora_csv = self.csv_path + tab_name + ".csv"
         self.kaf_csv = self.csv_path + topic + ".csv"
-        self.report_file = os.path.dirname(self.current_path) + "/report"
-
-    def __del__(self):
-        pass
+        self.report_file = os.path.dirname(self.current_path) + "/report/diff_report.txt"
+        self.diff_datas = self.compare()
 
     def write_report(self):
-
+        if not self.diff_datas is None:
+            f = open(self.report_file, "a")
+            f.write(self.diff_datas)
+            f.close()
 
     def compare(self):
         ora_csv = open(self.ora_csv, "r")
@@ -44,5 +46,6 @@ class CompareCSV:
 if __name__ == '__main__':
     f = CompareCSV()
     # g = f.compare()
-    g = f.write_report()
-    print(g)
+    # g = f.write_report()
+    f.write_report()
+    # print(g)
