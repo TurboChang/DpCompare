@@ -26,10 +26,11 @@ class CompareCSV:
     def write_report(self):
         if not self.diff_datas is None:
             f = open(self.report_file, "a")
-            f.write(self.diff_datas)
+            [f.write(str(data) + "\n") for data in self.diff_datas]
             f.close()
 
     def compare(self):
+        diff_datas_list = []
         ora_csv = open(self.ora_csv, "r")
         kaf_csv = open(self.kaf_csv, "r")
         source = load_csv(ora_csv, key=None)
@@ -38,9 +39,10 @@ class CompareCSV:
             diff = compare(source, target)
             diff_str = "{'added': [], 'removed': [], 'changed': [], 'columns_added': [], 'columns_removed': []}"
             if str(diff) != diff_str:
-                print(diff)
+                diff_datas_list.append(diff)
         ora_csv.close()
         kaf_csv.close()
+        return diff_datas_list
 
 
 if __name__ == '__main__':
