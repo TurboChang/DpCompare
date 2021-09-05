@@ -45,7 +45,7 @@ WHERE KU.TABLE_NAME = UPPER('{0}')
 
 # Mail
 host = "smtp.exmail.qq.com"
-subject = u"DataPipeline Agent-长测数据对比差异报告"
+subject = u"DataPipeline Agent-数据对比差异报告"
 to_mail = ["clx@datapipeline.com"]
 cc_mail = ["hanlin@datapipeline.com"]
 from_mail = "clx@datapipeline.com"
