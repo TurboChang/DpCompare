@@ -94,16 +94,12 @@ class OracleDB:
         cursor = self.db.cursor()
         cursor.execute(set_tz)
         sql = "select {0} from {1} order by {2}".format(cols_name, self.table_name, pk)
-        print(sql)
         cursor.execute(sql)
         res = cursor.fetchall()
         to_csv = open(self.csv_file, "w", encoding="utf-8")
         writer = csv.writer(to_csv)
         writer.writerow(open(self.col_files, "r").read().split(","))  # write csv title from data table columns
-        for row in res:
-            # result = ",".join('%s' %id for id in row)
-            result = list(row)
-            writer.writerow(result)
+        [writer.writerow(list(row)) for row in res]
         to_csv.close()
 
 

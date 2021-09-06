@@ -15,15 +15,11 @@ report_file = r"core/report/compare.txt"
 class DpMail:
 
     def __init__(self):
+        self.current_path = os.path.dirname(__file__)
         self.current_time = datetime.datetime.now().strftime("%Y-%m-%d:%H%M%S")
         self.parent_path = os.getcwd()
-        self.report_file_1 = r"/core/report/compare.txt"
-        self.report_file = self.parent_path + self.report_file_1
-
-    def __del__(self):
-        old_name = self.parent_path + "/core/report/compare.txt"
-        new_name = self.parent_path + "/core/report/compare-" + str(self.current_time) + ".txt"
-        os.rename(old_name, new_name)
+        # self.report_file_1 = r"/core/report/compare.txt"
+        self.report_file = os.path.dirname(self.current_path) + "/report/diff_report.txt"
 
     def get_content(self):
         file_stat = os.stat(self.report_file).st_size
@@ -49,3 +45,7 @@ class DpMail:
             print(str(self.current_time) + "-邮件发送成功.")
         else:
             raise EmailException("邮件: {0} 发送失败".format(self.get_content()))
+
+if __name__ == '__main__':
+    f = DpMail()
+    f.sendmail()

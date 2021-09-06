@@ -3,6 +3,7 @@
 
 import os
 import sys
+import json
 from csv_diff import load_csv, compare
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
@@ -24,9 +25,10 @@ class CompareCSV:
         self.diff_datas = self.compare()
 
     def write_report(self):
+        title = tab_name + " difference data is: "
         if not self.diff_datas is None:
             f = open(self.report_file, "a")
-            [f.write(str(data) + "\n") for data in self.diff_datas]
+            [f.write(title + str(json.dumps(data, indent=2) + "\n\n")) for data in self.diff_datas]
             f.close()
 
     def compare(self):
