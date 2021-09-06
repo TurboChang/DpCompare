@@ -9,8 +9,7 @@ from email.mime.text import MIMEText
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 from assets.conf_case import *
-
-report_file = r"core/report/compare.txt"
+from exception.related_exception import EmailException
 
 class DpMail:
 
@@ -18,7 +17,6 @@ class DpMail:
         self.current_path = os.path.dirname(__file__)
         self.current_time = datetime.datetime.now().strftime("%Y-%m-%d:%H%M%S")
         self.parent_path = os.getcwd()
-        # self.report_file_1 = r"/core/report/compare.txt"
         self.report_file = os.path.dirname(self.current_path) + "/report/diff_report.txt"
 
     def get_content(self):
