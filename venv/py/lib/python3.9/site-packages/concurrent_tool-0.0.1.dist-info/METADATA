@@ -1,0 +1,50 @@
+Metadata-Version: 2.1
+Name: concurrent-tool
+Version: 0.0.1
+Summary: Concurrent libraries for easy use of thread pools, process pools, and coroutines
+Home-page: https://github.com/lvyunze/concurrent-tool
+Author: lvyunze
+Author-email: 17817462542@163.com
+License: UNKNOWN
+Keywords: thread pool、process pool、coroutines pool
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+
+> pip install concurrent-tool
+
+> Concurrent libraries for easy use of thread pools, process pools, and coroutines
+
+> requests must be installed to test before use,but the concurrent-tool library is not dependent
+```
+import requests
+from tool import Multithreading, Multiprocess, Coroutines
+
+def get_info(url):
+    data = requests.get(url)
+    print(data.status_code)
+    return data
+
+# use multithreading
+
+request_list = [
+                "http://icanhazip.com",
+                "https://github.com/OmkarPathak/pygorithm",
+                "https://www.cnblogs.com/lipijin/p/3862684.html"
+               ]
+multithreading = Multithreading(get_info, request_list, 2)
+multithreading.multithreading()
+
+# use multiprocess
+multiprocess = Multiprocess(get_info, request_list, 3)
+multiprocess.multiprocess()
+
+
+# use coroutines
+Coroutines([get_info(url) for url in request_list])
+```
+
+

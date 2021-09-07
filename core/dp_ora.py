@@ -51,12 +51,16 @@ class OracleDB:
         col_name = [",".join(x) for x in cols]
         return col_name
 
-    def alter(self, file, old_str, new_str):
-        with open(file, "r", encoding="utf-8") as f1, open("%s.bak" % file, "w", encoding="utf-8") as f2:
-            for line in f1:
-                f2.write(re.sub(old_str, new_str, line))
-        os.remove(file)
-        os.rename("%s.bak" % file, file)
+    # def alter(self, file, old_str, new_str):
+    #     with open(file, "r", encoding="utf-8") as f1, open("%s.bak" % file, "w", encoding="utf-8") as f2:
+    #         for line in f1:
+    #             f2.write(re.sub(old_str, new_str, line))
+    #     os.remove(file)
+    #     os.rename("%s.bak" % file, file)
+
+    def decide_ltz_type(self):
+        sql = col_type.format(tab_name, username, column_name)
+        print(sql)
 
     def decide_tz_cols(self):
         newcols = []
@@ -90,7 +94,7 @@ class OracleDB:
         pk = ",".join(self.get_pk_col())
         db_tz_sql = "select dbtimezone from dual"
         db_tz = self.__execute(db_tz_sql)
-        set_tz = "alter session set time_zone = '{0}'".format(db_tz[0][0])
+        set_tz = "alter session set time_zone = '{0}'".format(db_tz[0][0])  # 转成与kafka一致还是使用dbtimezone？？
         cursor = self.db.cursor()
         cursor.execute(set_tz)
         sql = "select {0} from {1} order by {2}".format(cols_name, self.table_name, pk)
@@ -108,5 +112,6 @@ if __name__ == '__main__':
     # d = f.get_pk_col()
     # f.decide_tz_cols()
     # print(d)
-    h = f.query()
-    print(h)
+    # h = f.query()
+    # print(h)
+

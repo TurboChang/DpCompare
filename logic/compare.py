@@ -9,6 +9,7 @@ base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
 from assets.conf_case import *
 from core.dp_ora import OracleDB as Ora
+from exception.related_exception import W_Report_Exception
 
 class CompareCSV:
     alias = "COMPARE"
@@ -30,6 +31,8 @@ class CompareCSV:
             f = open(self.report_file, "a")
             [f.write(title + str(json.dumps(data, indent=2) + "\n\n")) for data in self.diff_datas]
             f.close()
+        else:
+            raise W_Report_Exception("数据差异报告写入失败")
 
     def compare(self):
         diff_datas_list = []

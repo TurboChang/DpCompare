@@ -20,3 +20,7 @@ class RegressionException(Exception):
 class EmailException(RegressionException):
     """抛出邮件模块异常"""
     pass
+
+class W_Report_Exception(RegressionException):
+    """抛出报告写入异常"""
+    pass

@@ -15,17 +15,14 @@ username = "dp_test"
 password = "123456"
 database = "orcl"
 db_info = [host, port, username, password, database]
-# tab_name = "T1"
 tab_name = "T1_NEW"
 column_name = "col_ltz"
-c_type = """
-        SELECT COLUMN_NAME, 
-               DATA_TYPE
+col_type = """
+SELECT DATA_TYPE
 FROM ALL_TAB_COLUMNS
 WHERE TABLE_NAME = UPPER('{0}')
   AND OWNER = UPPER('{1}')
   AND COLUMN_NAME = '{2}'
-ORDER BY COLUMN_ID
 """
 primary_key = """
 SELECT 
