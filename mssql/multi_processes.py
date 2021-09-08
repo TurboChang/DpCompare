@@ -25,8 +25,8 @@ def db_call(func):
         except Exception as e:
             has_error = e
         stop_time = datetime.datetime.now()
-        ms = (stop_time - start_time).microseconds / 1000
-        print('Query time: {0}ms'.format(str(ms)))
+        ms = (stop_time - start_time).seconds
+        print('Query time: {0}s'.format(str(ms)))
         print(DB_LOGGING_END)
         if has_error:
             raise has_error
@@ -39,7 +39,8 @@ class Base:
     用于连接和关闭
     """
 
-    def __init__(self, proc):
+    def __init__(self, proc, batch):
+        self.batch = batch
         self.pool = self.create_pool()
         self.executor = ThreadPoolExecutor(max_workers=proc)
 
@@ -79,28 +80,24 @@ class Base:
             traceback.print_exc()
 
     # 插入数据
+    # @db_call
     def insertdata(self, data):
+        values_list = []
         sql = "insert into test (col1, col2, col3, col4, col5, col6, col7, col8, col9) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        args = [tuple([data for i in range(9) if id and data])]
-        # print(args)
-        self.save_mysql(sql, args)
+        args = tuple([data for i in range(9) if id and data])
+        [values_list.append(args) for i in range(self.batch) if args]
+        self.save_mysql(sql, values_list)
 
     @db_call
     def find_all_done(self):
         tasks = []
-        for row in range(10000):
-            tasks.append(self.executor.submit(self.insertdata, "xxx"))  # submit函数来提交线程需要执行的任务（函数名和参数）到线程池中，不阻塞
-
         datas = []
-        for future in as_completed(tasks):  # as_completed()是ThreadPoolExecutor中的方法，用于取出所有任务的结果
-            datas.append(future.result())
-
-        print(tasks)
-        print(datas)
+        tasks.append(self.executor.submit(self.insertdata, "xxx"))  # submit函数来提交线程需要执行的任务（函数名和参数）到线程池中，不阻塞
+        [datas.append(future.result()) for future in as_completed(tasks)]  # as_completed()是ThreadPoolExecutor中的方法，用于取出所有任务的结果
 
 
 if __name__ == '__main__':
-    f = Base(4)
+    f = Base(4, 10000)
     f.find_all_done()
     # f.insertdata("xxx")
 
