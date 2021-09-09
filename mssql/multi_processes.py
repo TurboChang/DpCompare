@@ -170,7 +170,7 @@ class Base:
                 where_sql = " or ".join(li)
                 reel_time_sql = "select * from test where {0}".format(where_sql)
                 results = self.__query_mssql(reel_time_sql)
-                print(results)
+                # print(results)
                 # self.__query_mssql(reel_time_sql)
 
     def save_mssql(self, sql, args):
@@ -207,7 +207,7 @@ class Base:
 
         # submit函数来提交线程需要执行的任务（函数名和参数）到线程池中，不阻塞
         [tasks.append(self.executor.submit(self.insertdata, "xxx")) for i in range(self.proc) if self.proc]
-        # [tasks.append(self.executor.submit(self.query_datas, "")) for i in range(self.proc) if self.proc]
+        [tasks.append(self.executor.submit(self.query_datas,)) for i in range(self.proc) if self.proc]
         # as_completed()是ThreadPoolExecutor中的方法，用于取出所有任务的结果
         [datas.append(future.result()) for future in as_completed(tasks)]
 
@@ -216,8 +216,8 @@ if __name__ == '__main__':
     f = Base(2, 100)
     f.find_all_done()
     # f.insertdata("xxx")
-    g = f.query_datas()
-    print(g)
+    # g = f.query_datas()
+    # print(g)
 
 
 
