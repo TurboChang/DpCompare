@@ -11,6 +11,20 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 DB_LOGGING_START = '-' * 10 + 'DB-START' + '-' * 10
 DB_LOGGING_END = '-' * 11 + 'DB-END' + '-' * 11
 
+get_pk_cols = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'test' ORDER BY ORDINAL_POSITION"
+get_pk_dats = "select %s from CHANGETABLE( CHANGES test, 0) as ct"
+get_d_types = """select b.name,
+                        case c.name 
+                            when 'numeric' then 'numeric(' + convert(varchar,b.length) + '，' + convert(varchar,b.xscale) + ')'
+                            when 'char' then 'char(' + convert(varchar,b.length) + ')'
+                            when 'varchar' then 'varchar(' + convert(varchar,b.length) + ')'
+                        else c.name END AS col_type
+                from sysobjects a,syscolumns b,systypes c where a.id=b.id
+                    and a.name='test' 
+                    and a.xtype='U'
+                    and b.xtype=c.xtype
+                    and b.name in (%s)"""
+
 def db_call(func):
     """
     数据库调用装饰器，用于打印行为的用时
@@ -35,15 +49,15 @@ def db_call(func):
 
 # 基础类
 class Base:
-    """
-    用于连接和关闭
-    """
 
     def __init__(self, proc, batch):
         self.proc = proc
         self.batch = batch
         self.pool = self.create_pool()
         self.executor = ThreadPoolExecutor(max_workers=self.proc)
+
+    def __del__(self):
+        self.pool.close()
 
     def create_pool(self):
         """
@@ -64,7 +78,76 @@ class Base:
                         charset="utf8")
         return pool
 
-    def save_mysql(self, sql, args):
+    def __query_mssql(self, sql):
+        try:
+            db = self.pool.connection()  # 连接数据池
+            cursor = db.cursor()  # 获取游标
+            cursor.execute(sql)
+            res = cursor.fetchall()
+            cursor.close()
+            db.close()
+            return res
+        except:
+            traceback.print_exc()
+
+    def __decide_data_type(self, param, list):
+        # decide pk cols data type
+        newcols = []
+        rule_dict = {}
+        for e in list:
+            rule_dict[e[0]] = ""  # make null dict : {'col_date': '', 'id': ''}
+        for col in list:
+            col_name = col[0]
+            data_type = col[1]
+            new_col = param + col_name
+            if data_type == "date":
+                new_col = "convert(varchar, {0}{1})".format(param, col_name)
+            rule_dict[
+                col_name] = new_col  # new_col's value to rule_dict : {'col_date': 'convert(varchar, ct.col_date)', 'id': 'ct.id'}
+        for e in list:
+            newcols.append(rule_dict[e[0]])  # append values from rule_dict's key
+        return newcols
+
+    def __list_of_group(self, list_info, per_list_len):
+        list_of_group = zip(*(iter(list_info),) * per_list_len)
+        end_list = [list(i) for i in list_of_group]  # i is a tuple
+        count = len(list_info) % per_list_len
+        end_list.append(list_info[-count:]) if count != 0 else end_list
+        return end_list
+
+    def get_datas(self):
+        pk_cols = self.__query_mssql(get_pk_cols)
+
+        # get pk cols data type
+        cols_list = [col[0] for col in pk_cols if pk_cols]
+        d_sql_cols = (','.join("'" + item + "'" for item in cols_list))
+        d_type_sql = get_d_types % d_sql_cols
+        d_type= self.__query_mssql(d_type_sql)
+
+        # get pk values from ct
+        newcols = self.__decide_data_type("ct.", d_type)
+        ct_cols = ", ".join([col for col in newcols if newcols])
+        ct_sql = get_pk_dats % ct_cols
+        ct_datas = self.__query_mssql(ct_sql) # ct_datas : ('2021-09-08', 356312)
+
+        # real time query
+        condition_list = self.__decide_data_type("", d_type)
+        w_condition_dict = {}
+        w_values_list = []
+        for row in ct_datas:
+            for x, y in zip(condition_list, list(row)):
+                w_condition_dict[x] = y
+                res = " and ".join([k + "='" + str(w_condition_dict[k]) + "'" for k in w_condition_dict if w_condition_dict])
+                w_values_list.append(res)
+        end_list = self.__list_of_group(w_values_list, 50000)
+        for li in end_list:
+            where_sql = " or ".join(li)
+            reel_time_sql = "select * from test where {0}".format(where_sql)
+            # results = self.__query_mssql(reel_time_sql)
+            # print(results)
+            self.__query_mssql(reel_time_sql)
+
+    def save_mssql(self, sql, args):
         """
         保存数据库
         :param sql: 执行sql语句
@@ -81,20 +164,12 @@ class Base:
             traceback.print_exc()
 
     # 插入数据
-    # def insertdata(self, data):
-    #     values_list = []
-    #     sql = "insert into test (col1, col2, col3, col4, col5, col6, col7, col8, col9) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-    #     args = tuple([data for i in range(9) if id and data])
-    #     [values_list.append(args) for i in range(self.batch) if args]
-    #     # self.save_mysql(sql, values_list)
-    #     [self.save_mysql(sql, values_list) for i in range(self.proc)]
-
     def insertdata(self, data):
         values_list = []
         sql = "insert into test (col1, col2, col3, col4, col5, col6, col7, col8, col9) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         args = tuple([data for i in range(9) if id and data])
         [values_list.append(args) for i in range(self.batch) if args]
-        self.save_mysql(sql, values_list)
+        self.save_mssql(sql, values_list)
 
     @db_call
     def find_all_done(self):
@@ -109,8 +184,10 @@ class Base:
 
 if __name__ == '__main__':
     f = Base(4, 2500)
-    f.find_all_done()
+    # f.find_all_done()
     # f.insertdata("xxx")
+    g = f.get_datas()
+    print(g)
 
 
 

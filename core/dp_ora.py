@@ -75,7 +75,7 @@ class OracleDB:
         for col in datatype:
             col_name = col[0]
             data_type = col[1]
-            new_col = col_name   # make new variable`
+            new_col = col_name   # make new variables
             tz_obj = re.search(r"WITH TIME ZONE", data_type)    # match timestamp with time zone type
             if data_type[0:9] == "TIMESTAMP":   # 需要处理timestamp tz的数据类型
                 if tz_obj:
