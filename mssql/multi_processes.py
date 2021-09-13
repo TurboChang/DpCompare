@@ -200,7 +200,7 @@ class Base:
         fileio = self.__file_io("w")
         fileio.write(current_ct_version)
 
-    @db_call
+    # @db_call
     def find_all_done(self):
         tasks = []
         datas = []
